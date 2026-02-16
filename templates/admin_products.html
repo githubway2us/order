@@ -2,71 +2,236 @@
 
 {% block title %}จัดการสินค้า{% endblock %}
 
+{% block head_extra %}
+<style>
+  .admin-products-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .alert-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .form-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-bottom: 3rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  tr:hover {
+    background: #f9fafb;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-outline {
+    background: white;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+  }
+
+  .btn-outline:hover {
+    background: #eff6ff;
+  }
+
+  .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>จัดการสินค้า</h2>
+<div class="admin-products-container">
 
-{% if success %}
-  <div class="alert alert-success">{{ success }}</div>
-{% endif %}
-{% if error %}
-  <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
-
-<!-- ฟอร์มเพิ่มสินค้าใหม่ -->
-<h3>เพิ่มสินค้าใหม่</h3>
-<form method="POST" action="/admin/product/add" style="max-width:500px; margin-bottom:3rem;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div style="margin-bottom:1rem;">
-    <label>ชื่อสินค้า</label>
-    <input type="text" name="name" required style="width:100%; padding:0.6rem;">
+  <div class="page-header">
+    <h2 style="margin: 0;">จัดการสินค้า</h2>
   </div>
-  
-  <div style="margin-bottom:1rem;">
-    <label>ราคา (บาท)</label>
-    <input type="number" name="price" required min="0" style="width:100%; padding:0.6rem;">
-  </div>
-  
-  <div style="margin-bottom:1rem;">
-    <label>หมวดหมู่</label>
-    <select name="category" style="width:100%; padding:0.6rem;">
-      <option value="พวงมาลัย">พวงมาลัย</option>
-      <option value="ของไหว้">ของไหว้</option>
-      <option value="น้ำ">น้ำ</option>
-      <option value="อื่นๆ" selected>อื่นๆ</option>
-    </select>
-  </div>
-  
-  <button type="submit" class="btn btn-primary">เพิ่มสินค้า</button>
-</form>
 
-<!-- รายการสินค้าทั้งหมด -->
-<h3>รายการสินค้าปัจจุบัน</h3>
-<table style="width:100%; border-collapse:collapse;">
-  <thead>
-    <tr style="background:#f3f4f6;">
-      <th style="padding:0.8rem;">ID</th>
-      <th style="padding:0.8rem;">ชื่อสินค้า</th>
-      <th style="padding:0.8rem;">หมวดหมู่</th>
-      <th style="padding:0.8rem;">ราคา</th>
-      <th style="padding:0.8rem;">จัดการ</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for p in products %}
-    <tr style="border-bottom:1px solid #e5e7eb;">
-      <td style="padding:0.8rem; text-align:center;">{{ p['id'] }}</td>
-      <td style="padding:0.8rem;">{{ p['name'] }}</td>
-      <td style="padding:0.8rem;">{{ p['category'] or 'ไม่ระบุ' }}</td>
-      <td style="padding:0.8rem; text-align:right;">{{ p['price'] }} บาท</td>
-      <td style="padding:0.8rem; text-align:center;">
-        <a href="/admin/product/edit/{{ p['id'] }}" class="btn btn-outline">แก้ไข</a>
-        <form method="POST" action="/admin/product/delete/{{ p['id'] }}" style="display:inline;">
-          <button type="submit" class="btn btn-danger" onclick="return confirm('ยืนยันการลบ?')">ลบ</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  {% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+  {% endif %}
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
 
+  <!-- ฟอร์มเพิ่มสินค้าใหม่ -->
+  <div class="form-section">
+    <h3 style="margin-top: 0;">เพิ่มสินค้าใหม่</h3>
+    <form method="POST" action="{{ url_for('add_product') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="name">ชื่อสินค้า</label>
+        <input type="text" id="name" name="name" required class="form-control" placeholder="เช่น พวงมาลัยดอกมะลิขนาดกลาง">
+      </div>
+
+      <div class="form-group">
+        <label for="price">ราคา (บาท)</label>
+        <input type="number" id="price" name="price" required min="0" class="form-control" placeholder="เช่น 120">
+      </div>
+
+      <div class="form-group">
+        <label for="category">หมวดหมู่</label>
+        <select id="category" name="category" class="form-control">
+          <option value="พวงมาลัย">พวงมาลัย</option>
+          <option value="ของไหว้">ของไหว้</option>
+          <option value="น้ำ">น้ำ</option>
+          <option value="อื่นๆ" selected>อื่นๆ</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">เพิ่มสินค้า</button>
+    </form>
+  </div>
+
+  <!-- รายการสินค้าปัจจุบัน -->
+  <h3 style="margin: 2.5rem 0 1rem;">รายการสินค้าทั้งหมด</h3>
+
+  {% if products %}
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>ชื่อสินค้า</th>
+            <th>หมวดหมู่</th>
+            <th style="text-align: right;">ราคา</th>
+            <th style="text-align: center;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td style="text-align: center;">{{ p.id }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.category or 'ไม่ระบุ' }}</td>
+            <td style="text-align: right;">{{ p.price|format_number }} บาท</td>
+            <td style="text-align: center;">
+              <div class="action-buttons">
+                <a href="{{ url_for('edit_product', pid=p.id) }}" class="btn btn-outline">แก้ไข</a>
+                <form method="POST" action="{{ url_for('delete_product', pid=p.id) }}" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-danger" onclick="return confirm('ยืนยันการลบสินค้า \"{{ p.name|e }}\" ? การลบจะถาวรและไม่สามารถกู้คืนได้')">
+                    ลบ
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="no-data">
+      <p>ยังไม่มีสินค้าในระบบ</p>
+      <small>เริ่มต้นโดยเพิ่มสินค้าใหม่ด้านบน</small>
+    </div>
+  {% endif %}
+
+</div>
 {% endblock %}

@@ -1,0 +1,16 @@
+{% if pending_orders %}
+  {% for order_id, order in pending_orders|dictsort(reverse=true) %}
+    {% with %}
+      {% set next_status = 'confirmed' %}
+      {% set action_text = 'ยืนยันรับออเดอร์' %}
+      {% set action_class = 'btn-confirm' %}
+      {% include 'admin_order_card.html' %}
+    {% endwith %}
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">⏳</div>
+    <h3>ไม่มีออเดอร์รอยืนยัน</h3>
+    <p>ออเดอร์ใหม่จะปรากฏที่นี่อัตโนมัติ</p>
+  </div>
+{% endif %}

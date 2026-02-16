@@ -9,55 +9,88 @@
 
   {% if orders %}
     {% for order_id, order in orders|dictsort(reverse=true) %}
-      <div style="background: white; border-radius: 12px; box-shadow: var(--shadow-md); margin-bottom: 2rem; overflow: hidden;">
+      <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 2.5rem; overflow: hidden;">
 
+        <!-- Header -->
         <div style="padding: 1.5rem; background: #f8fafc; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <h3 style="margin: 0;">ออเดอร์ #{{ order.id }}</h3>
-            <small style="color: #6b7280;">{{ order.created_at|dateformat }}</small>
-            <small style="color: #6b7280;">หากยังมีสถานะรอยืนยัน สามารถแจ้งด่วนที่เบอร์ 092-249 8938 คุณอุ๊</small>
+            <h3 style="margin: 0 0 0.25rem;">ออเดอร์ #{{ order.id }}</h3>
+            <small style="color: #6b7280;">วันที่สั่ง: {{ order.created_at|dateformat }}</small>
           </div>
 
           <div style="text-align: right;">
             <div style="margin-bottom: 0.5rem;">
               {% if order.status == 'pending' %}
-                <span style="background: #fef3c7; color: #92400e; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600;">รอยืนยัน</span>
+                <span style="background: #fef3c7; color: #92400e; padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 600;">รอยืนยัน</span>
               {% elif order.status == 'confirmed' %}
-                <span style="background: #d1fae5; color: #065f46; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 600;">ยืนยันแล้ว</span>
+                <span style="background: #dbeafe; color: #1e40af; padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 600;">ยืนยันแล้ว</span>
+              {% elif order.status == 'preparing' %}
+                <span style="background: #f3e8ff; color: #6b21a8; padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 600;">กำลังจัดของ</span>
+              {% elif order.status == 'completed' %}
+                <span style="background: #d1fae5; color: #065f46; padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 600;">ปิดจ๊อบ / เสร็จสิ้น</span>
               {% else %}
-                <span style="background: #e5e7eb; color: #374151; padding: 0.5rem 1rem; border-radius: 999px;">{{ order.status|default('ไม่ระบุ') }}</span>
+                <span style="background: #e5e7eb; color: #374151; padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 600;">{{ order.status|default('ไม่ระบุ') }}</span>
               {% endif %}
             </div>
-            <strong>{{ order.total|int }} บาท</strong>
+            <strong style="font-size: 1.3rem;">{{ order.total|int }} บาท</strong>
           </div>
         </div>
 
-        <div style="padding: 1.5rem;">
-          <p><strong>ชื่อผู้สั่ง:</strong> {{ order.customer_name }}</p>
-          <p><strong>เบอร์โทร:</strong> {{ order.phone }}</p>
+        <!-- Body -->
+        <div style="padding: 1.75rem;">
 
+          <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem;">
+            <div><strong>ชื่อผู้สั่ง:</strong> {{ order.customer_name }}</div>
+            <div><strong>เบอร์โทร:</strong> {{ order.phone }}</div>
+          </div>
+
+          <!-- คำอธิบายสถานะ -->
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.75rem; line-height: 1.6;">
+            {% if order.status == 'pending' %}
+              <strong style="color: #1e40af;">สถานะปัจจุบัน: รอยืนยัน</strong><br>
+              กำลังรอร้านค้าตรวจสอบและยืนยันออเดอร์<br>
+              <small>หากรอนาน สามารถโทรแจ้งได้ที่ 092-249 8938 (คุณอุ๊)</small>
+
+            {% elif order.status == 'confirmed' %}
+              <strong style="color: #1e40af;">สถานะปัจจุบัน: ยืนยันแล้ว</strong><br>
+              ร้านได้รับออเดอร์เรียบร้อย กำลังจัดเตรียมสินค้า
+
+            {% elif order.status == 'preparing' %}
+              <strong style="color: #6b21a8;">สถานะปัจจุบัน: กำลังจัดของ</strong><br>
+              <strong style="color: #c026d3;">ท่านสามารถมารับสินค้าที่หน้าร้านได้เลย</strong><br>
+              กรุณาแจ้งเลขออเดอร์ #{{ order.id }} กับพนักงาน
+
+            {% elif order.status == 'completed' %}
+              <strong style="color: #065f46;">สถานะปัจจุบัน: ปิดจ๊อบ / เสร็จสิ้น</strong><br>
+              ออเดอร์นี้เสร็จสมบูรณ์แล้ว ขอบคุณที่ใช้บริการ 💐
+
+            {% else %}
+              <strong>สถานะ: {{ order.status|default('ไม่ระบุ') }}</strong>
+            {% endif %}
+          </div>
+
+          <!-- ตารางสินค้า -->
           <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
             <thead>
               <tr style="background: #f3f4f6;">
-                <th style="padding: 0.75rem; text-align: left;">สินค้า</th>
-                <th style="padding: 0.75rem; text-align: right;">ราคา</th>
-                <th style="padding: 0.75rem; text-align: center;">จำนวน</th>
-                <th style="padding: 0.75rem; text-align: right;">รวม</th>
+                <th style="padding: 0.9rem; text-align: left;">สินค้า</th>
+                <th style="padding: 0.9rem; text-align: right;">ราคา</th>
+                <th style="padding: 0.9rem; text-align: center;">จำนวน</th>
+                <th style="padding: 0.9rem; text-align: right;">รวม</th>
               </tr>
             </thead>
             <tbody>
               {% for item in order["items"] %}
-
                 <tr style="border-bottom: 1px solid #e5e7eb;">
-                  <td style="padding: 0.75rem;">{{ item.product }}</td>
-                  <td style="padding: 0.75rem; text-align: right;">{{ item.price|int }} บาท</td>
-                  <td style="padding: 0.75rem; text-align: center;">{{ item.qty }}</td>
-                  <td style="padding: 0.75rem; text-align: right;">{{ item.subtotal|int }} บาท</td>
+                  <td style="padding: 0.9rem;">{{ item.product }}</td>
+                  <td style="padding: 0.9rem; text-align: right;">{{ item.price|int }} บาท</td>
+                  <td style="padding: 0.9rem; text-align: center;">{{ item.qty }}</td>
+                  <td style="padding: 0.9rem; text-align: right;">{{ item.subtotal|int }} บาท</td>
                 </tr>
               {% endfor %}
               <tr style="font-weight: bold; background: #f9fafb;">
-                <td colspan="3" style="padding: 0.75rem; text-align: right;">ยอดรวม</td>
-                <td style="padding: 0.75rem; text-align: right;">{{ order.total|int }} บาท</td>
+                <td colspan="3" style="padding: 0.9rem; text-align: right;">ยอดรวมทั้งสิ้น</td>
+                <td style="padding: 0.9rem; text-align: right;">{{ order.total|int }} บาท</td>
               </tr>
             </tbody>
           </table>
@@ -65,11 +98,11 @@
       </div>
     {% endfor %}
   {% else %}
-    <div style="text-align: center; padding: 4rem 1rem; background: white; border-radius: 12px; box-shadow: var(--shadow-md);">
-      <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+    <div style="text-align: center; padding: 5rem 1rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+      <div style="font-size: 5rem; margin-bottom: 1.25rem;">📭</div>
       <h3>ยังไม่มีออเดอร์</h3>
-      <p style="color: #6b7280; margin: 1rem 0;">เมื่อคุณสั่งซื้อสินค้า ประวัติจะปรากฏที่นี่</p>
-      <a href="/" class="btn btn-primary" style="padding: 0.8rem 2rem;">กลับไปสั่งซื้อ</a>
+      <p style="color: #6b7280; margin: 1.25rem 0 2rem;">เมื่อคุณสั่งซื้อ ประวัติจะปรากฏที่นี่</p>
+      <a href="/" class="btn btn-primary" style="padding: 0.9rem 2.2rem; font-size: 1.1rem;">กลับไปสั่งซื้อ</a>
     </div>
   {% endif %}
 

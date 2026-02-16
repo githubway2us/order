@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}รายละเอียดออเดอร์ #{{ order.id }} - Admin{% endblock %}
+
+{% block head_extra %}
+<style>
+  :root {
+    --primary: #3b82f6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+
+  .order-header {
+    background: linear-gradient(135deg, #f8fafc, #e5e7eb);
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  .order-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .meta-item {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .meta-label {
+    font-size: 0.9rem;
+    color: #4b5563;
+    margin-bottom: 0.3rem;
+  }
+
+  .meta-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .status-badge {
+    padding: 0.5rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .status-pending    { background: #fef3c7; color: #92400e; }
+  .status-confirmed  { background: #dbeafe; color: #1e40af; }
+  .status-preparing  { background: #f3e8ff; color: #6b21a8; }
+  .status-completed  { background: #d1fae5; color: #065f46; }
+
+  .order-details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  table.order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table.order-items-table th,
+  table.order-items-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  table.order-items-table th {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  table.order-items-table .text-right {
+    text-align: right;
+  }
+
+  .total-row {
+    font-weight: bold;
+    font-size: 1.15rem;
+    background: #f8fafc;
+  }
+
+  .total-row td:last-child {
+    color: var(--primary);
+  }
+
+  .back-btn {
+    padding: 0.7rem 1.5rem;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .back-btn:hover {
+    background: #4b5563;
+  }
+
+  .customer-info {
+    background: #f0f9ff;
+    padding: 1.2rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 576px) {
+    .order-meta {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width: 900px; margin: 2rem auto;">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">ออเดอร์ #{{ order.id }}</h1>
+    <a href="{{ url_for('admin') }}" class="back-btn">
+      ← กลับไปหน้าจัดการออเดอร์
+    </a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="order-details-card">
+
+    <!-- Header -->
+    <div class="order-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <h4 class="mb-1">ข้อมูลลูกค้า</h4>
+          <div class="customer-info">
+            <strong style="font-size:1.3rem;">{{ order.customer_name|e }}</strong><br>
+            <div style="margin:0.5rem 0;">
+              <span style="color:#4b5563;">โทรศัพท์:</span> 
+              <strong>{{ order.phone|e }}</strong>
+            </div>
+            {% if order.user_id %}
+              <div>
+                <span style="color:#4b5563;">สมาชิก:</span> 
+                <a href="#" style="color:var(--primary); text-decoration:none;">
+                  {{ order.username or 'ดูโปรไฟล์' }}
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="text-end">
+          <div class="mb-2">
+            <span class="status-badge status-{{ order.status|default('pending') }}">
+              {% if order.status == 'pending' %}รอยืนยัน
+              {% elif order.status == 'confirmed' %}ยืนยันแล้ว
+              {% elif order.status == 'preparing' %}กำลังจัดของ
+              {% elif order.status == 'completed' %}ปิดจ๊อบแล้ว
+              {% else %}{{ order.status|capitalize }}{% endif %}
+            </span>
+          </div>
+          <div style="color:#4b5563; font-size:0.95rem;">
+            สร้างเมื่อ: {{ order.created_at|dateformat }}
+          </div>
+          {% if order.updated_at %}
+            <div style="color:#4b5563; font-size:0.95rem;">
+              อัปเดตล่าสุด: {{ order.updated_at|dateformat }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- รายการสินค้า -->
+    <div class="p-4">
+      <h4 class="mb-3">รายการสินค้า</h4>
+      
+      <div class="table-responsive">
+        <table class="order-items-table">
+          <thead>
+            <tr>
+              <th>สินค้า</th>
+              <th class="text-right">ราคาต่อหน่วย</th>
+              <th class="text-center">จำนวน</th>
+              <th class="text-right">ราคารวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>{{ item['product_name']|e }}</td>
+                <td class="text-right">{{ item['price']|int|default(0) }} บาท</td>
+                <td class="text-center">{{ item['quantity'] }}</td>
+                <td class="text-right">
+                  {{ (item['price'] * item['quantity'])|int }} บาท
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="4" class="text-center py-4 text-muted">
+                  ไม่พบรายการสินค้าในออเดอร์นี้
+                </td>
+              </tr>
+            {% endfor %}
+
+            <!-- รวมทั้งหมด -->
+            <tr class="total-row">
+              <td colspan="3" class="text-right">ยอดรวมทั้งสิ้น</td>
+              <td class="text-right">
+                {% set total = namespace(value=0) %}
+                {% for item in items %}
+                  {% set total.value = total.value + (item['price'] * item['quantity']) %}
+                {% endfor %}
+                {{ total.value|int }} บาท
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ปุ่มกลับ (อีกอันด้านล่าง) -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('admin') }}" class="back-btn btn-lg">
+      ← กลับไปหน้าจัดการออเดอร์
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

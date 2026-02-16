@@ -2,66 +2,197 @@
 
 {% block title %}โปรไฟล์ของฉัน{% endblock %}
 
+{% block head_extra %}
+<style>
+  .profile-container {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    max-width: 700px;
+    margin: 2rem auto;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e5e7eb;
+    margin-bottom: 1rem;
+  }
+
+  .avatar-placeholder {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: #9ca3af;
+    margin: 0 auto 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file-input-wrapper input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .preview-img {
+    max-width: 180px;
+    max-height: 180px;
+    margin-top: 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    display: none;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .alert-danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-  <h1>โปรไฟล์ส่วนตัว</h1>
+<div class="profile-container">
+
+  <div class="profile-header">
+    <h1>โปรไฟล์ส่วนตัว</h1>
+  </div>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        <div class="alert alert-{{ 'success' if category=='success' else 'danger' }}">
+        <div class="alert alert-{{ category }}">
           {{ message }}
         </div>
       {% endfor %}
     {% endif %}
   {% endwith %}
 
-  <div style="background:white; padding:2rem; border-radius:12px; box-shadow:var(--shadow-md); max-width:600px; margin:2rem auto;">
+  <!-- รูปโปรไฟล์ปัจจุบัน -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    {% if user.profile_picture %}
+      <img src="{{ url_for('static', filename=user.profile_picture) }}" 
+           alt="รูปโปรไฟล์" class="profile-avatar">
+    {% else %}
+      <div class="avatar-placeholder">👤</div>
+    {% endif %}
+    <p style="color: #6b7280; font-size: 0.95rem;">
+      ขนาดแนะนำ: 200x200 พิกเซล (ไฟล์ JPG/PNG ไม่เกิน 2MB)
+    </p>
+  </div>
 
-    <h3>ข้อมูลปัจจุบัน</h3>
-<p><strong>ชื่อผู้ใช้:</strong> {{ user.username }}</p>
-<p><strong>อีเมล:</strong> {{ user.email }}</p>
-<p><strong>เบอร์โทร:</strong> {{ user.phone or 'ยังไม่ได้ระบุ' }}</p>
-<p><strong>สมัครเมื่อ:</strong> {{ user.created_at|dateformat }}</p>
+  <hr style="margin: 2rem 0; border-color: #e5e7eb;">
 
-    <hr style="margin:2rem 0;">
+  <h3 style="margin-bottom: 1.5rem;">แก้ไขข้อมูล</h3>
 
-    <h3>แก้ไขโปรไฟล์</h3>
+  <form method="POST" action="/profile" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <form method="POST" action="/profile">
-       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div style="margin-bottom:1.2rem;">
-        <label>ชื่อผู้ใช้ใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
-        <input type="text" name="username" 
-               placeholder="{{ user.username }}"
-               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
+    <!-- อัปโหลดรูปโปรไฟล์ -->
+    <div class="form-group">
+      <label class="form-label">รูปโปรไฟล์</label>
+      <div class="file-input-wrapper">
+        <button type="button" class="btn btn-secondary" style="padding: 0.7rem 1.2rem;">
+          เลือกรูปโปรไฟล์ใหม่
+        </button>
+        <input type="file" name="profile_picture" accept="image/*" id="profile_pic_input">
       </div>
-<!-- ... ในฟอร์มแก้ไข ... -->
-<div style="margin-bottom:1.2rem;">
-  <label>เบอร์โทรใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
-  <input type="tel" name="phone" 
-         placeholder="{{ user.phone or 'เช่น 0812345678' }}"
-         pattern="[0-9]{9,10}"
-         style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
-</div>
-      <div style="margin-bottom:1.2rem;">
-        <label>อีเมลใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
-        <input type="email" name="email" 
-               placeholder="{{ user.email }}"
-               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
-      </div>
+      <img id="preview" class="preview-img" alt="ตัวอย่างรูปโปรไฟล์">
+      <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
+        (ถ้าต้องการเปลี่ยนรูป ให้เลือกไฟล์ใหม่ / ถ้าไม่เลือกจะคงรูปเดิมไว้)
+      </small>
+    </div>
 
-      <div style="margin-bottom:1.5rem;">
-        <label>รหัสผ่านใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
-        <input type="password" name="new_password"
-               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
-      </div>
+    <!-- ชื่อผู้ใช้ -->
+    <div class="form-group">
+      <label class="form-label">ชื่อผู้ใช้ใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+      <input type="text" name="username" 
+             placeholder="{{ user.username }}"
+             style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:6px;">
+    </div>
 
-      <button type="submit" class="btn btn-success" style="padding:0.8rem 2rem;">
+    <!-- อีเมล -->
+    <div class="form-group">
+      <label class="form-label">อีเมลใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+      <input type="email" name="email" 
+             placeholder="{{ user.email }}"
+             style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:6px;">
+    </div>
+
+    <!-- เบอร์โทร -->
+    <div class="form-group">
+      <label class="form-label">เบอร์โทรใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+      <input type="tel" name="phone" 
+             placeholder="{{ user.phone or 'เช่น 0812345678' }}"
+             pattern="[0-9]{9,10}"
+             style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:6px;">
+    </div>
+
+    <!-- รหัสผ่าน -->
+    <div class="form-group">
+      <label class="form-label">รหัสผ่านใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+      <input type="password" name="new_password"
+             style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:6px;">
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+      <button type="submit" class="btn btn-success" style="padding: 0.9rem 2.5rem; font-size: 1.1rem;">
         บันทึกการเปลี่ยนแปลง
       </button>
-    </form>
+    </div>
+  </form>
 
-  </div>
+</div>
+
+<script>
+// Preview รูปโปรไฟล์ก่อนอัปโหลด
+document.getElementById('profile_pic_input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const preview = document.getElementById('preview');
+      preview.src = event.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
 
 {% endblock %}

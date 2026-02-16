@@ -1,0 +1,91 @@
+{# templates/admin_order_card.html #}
+
+<div class="order-item">
+  <div class="order-summary">
+    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
+      {% if order.profile_picture %}
+        <img src="/static/{{ order.profile_picture }}" 
+             alt="{{ order.customer_name|e }}" 
+             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; 
+                    border: 2px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0;">
+      {% else %}
+        <div style="width: 48px; height: 48px; border-radius: 50%; 
+                    background: linear-gradient(135deg, #e0e7ff, #c7d2fe); 
+                    display: flex; align-items: center; justify-content: center; 
+                    font-size: 1.4rem; font-weight: bold; color: #6366f1; 
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0;">
+          {{ order.customer_name[0]|upper if order.customer_name else '?' }}
+        </div>
+      {% endif %}
+
+      <div style="min-width: 0; flex: 1;">
+        <strong>Order #{{ order.id }}</strong><br>
+        <span style="color: #4b5563; font-size: 0.95rem; display: block; 
+                     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          {{ order.customer_name|e }}
+        </span>
+      </div>
+    </div>
+
+    <div class="text-right" style="min-width: 220px; flex-shrink: 0;">
+      <div>📞 {{ order.phone|e }}</div>
+      <div>🕒 {{ order.created_at|dateformat }}</div>
+      <div style="margin-top: 0.5rem; font-size: 1.2rem; font-weight: 700;">
+        {{ order.total|int|default(0)|format_number }} บาท
+      </div>
+    </div>
+
+    <div style="width: 100%; margin-top: 0.75rem; text-align: center;">
+      <span class="status-badge badge-{{ order.status|default('pending') }}">
+        {% if order.status == 'pending' %}รอยืนยัน
+        {% elif order.status == 'confirmed' %}ยืนยันแล้ว
+        {% elif order.status == 'preparing' %}กำลังจัดของ
+        {% elif order.status == 'completed' %}ปิดจ๊อบแล้ว
+        {% else %}{{ order.status }}{% endif %}
+      </span>
+    </div>
+  </div>
+
+  <div class="order-details">
+    {% if order.status != 'completed' %}
+      <div style="margin: 1.25rem 0; text-align: right;">
+        <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="next_status" value="{{ next_status }}">
+          <button type="submit" 
+                  class="action-btn {{ action_class }}"
+                  data-order-id="{{ order.id }}"
+                  data-customer-name="{{ order.customer_name|e }}"
+                  data-next-status="{{ next_status }}">
+            {{ action_text }}
+          </button>
+        </form>
+      </div>
+    {% endif %}
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background: #f8fafc; color: #4b5563;">
+          <th style="padding: 0.75rem 1rem; text-align: left;">สินค้า</th>
+          <th style="padding: 0.75rem 1rem; text-align: right;">ราคาต่อหน่วย</th>
+          <th style="padding: 0.75rem 1rem; text-align: center;">จำนวน</th>
+          <th style="padding: 0.75rem 1rem; text-align: right;">รวม</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.get('items', []) %}
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem 1rem;">{{ item.product|e }}</td>
+            <td style="padding: 0.75rem 1rem; text-align: right;">{{ item.price|int|format_number }} บาท</td>
+            <td style="padding: 0.75rem 1rem; text-align: center;">{{ item.qty }}</td>
+            <td style="padding: 0.75rem 1rem; text-align: right;">{{ item.subtotal|int|format_number }} บาท</td>
+          </tr>
+        {% endfor %}
+        <tr style="font-weight: bold; background: #f1f5f9;">
+          <td colspan="3" style="padding: 1rem; text-align: right;">ยอดรวมทั้งออเดอร์</td>
+          <td style="padding: 1rem; text-align: right;">{{ order.total|int|default(0)|format_number }} บาท</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

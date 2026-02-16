@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}แดชบอร์ดของฉัน{% endblock %}
+
+{% block head_extra %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+  }
+
+  .stat-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    flex: 1;
+    margin: 0 0.75rem;
+    min-width: 180px;
+  }
+
+  .stat-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--primary, #3b82f6);
+  }
+
+  .stat-label {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+
+  .points-section {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 320px;
+    margin-top: 1.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+
+  <h1 style="margin-bottom: 2.5rem; text-align: center;">แดชบอร์ดของฉัน</h1>
+
+  <!-- สรุปยอดใช้จ่าย -->
+  <div class="card">
+    <div class="card-header">
+      <h3 style="margin: 0;">สรุปยอดใช้จ่าย</h3>
+      <small style="color: #6b7280;">อัปเดตเมื่อ {{ current_time|dateformat }}</small>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+      <div class="stat-box">
+        <div class="stat-number">{{ weekly_total|int|default(0) }}</div>
+        <div class="stat-label">สัปดาห์นี้ (บาท)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">{{ monthly_total|int|default(0) }}</div>
+        <div class="stat-label">เดือนนี้ (บาท)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">{{ yearly_total|int|default(0) }}</div>
+        <div class="stat-label">ปีนี้ (บาท)</div>
+      </div>
+      <div class="stat-box" style="background: #ecfdf5;">
+        <div class="stat-number">{{ all_time_total|int|default(0) }}</div>
+        <div class="stat-label">ทั้งหมด (บาท)</div>
+      </div>
+    </div>
+
+    <!-- กราฟยอดใช้จ่ายรายเดือน -->
+    <div class="chart-container">
+      <canvas id="expenseChart"></canvas>
+    </div>
+  </div>
+
+  <!-- สถานะแต้มและรางวัล -->
+  <div class="card points-section">
+    <div class="card-header">
+      <h3 style="margin: 0; color: #6b21a8;">แต้มสะสม & รางวัล</h3>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;">
+      <div class="stat-box" style="background: white; border: 2px dashed #c026d3;">
+        <div class="stat-number">{{ available_points|default(0) }}</div>
+        <div class="stat-label">แต้มที่ใช้ได้</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">{{ earned_points|default(0) }}</div>
+        <div class="stat-label">แต้มที่ได้รับแล้ว</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">{{ redeemed_points|default(0) }}</div>
+        <div class="stat-label">แต้มที่ใช้ไปแล้ว</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">{{ pending_points|default(0) }}</div>
+        <div class="stat-label">แต้มรอรับ (จากออเดอร์ที่ยังไม่เสร็จ)</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center;">
+      <a href="/rewards" class="btn btn-primary" style="padding: 0.9rem 2rem; font-size: 1.1rem;">
+        ดูรางวัลที่แลกได้
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// กราฟสรุปยอดใช้จ่ายรายเดือน (ตัวอย่าง 6 เดือนล่าสุด)
+const ctx = document.getElementById('expenseChart').getContext('2d');
+const expenseChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: {{ monthly_labels|tojson }},  // เช่น ["ม.ค. 2026", "ก.พ. 2026", ...]
+    datasets: [{
+      label: 'ยอดใช้จ่าย (บาท)',
+      data: {{ monthly_data|tojson }},     // เช่น [1200, 850, 2300, 1800, 950, 4100]
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      borderColor: 'rgba(59, 130, 246, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true }
+    },
+    plugins: {
+      legend: { display: false }
+    }
+  }
+});
+</script>
+
+{% endblock %}

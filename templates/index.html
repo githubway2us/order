@@ -4,10 +4,8 @@
 
 {% block head_extra %}
 <style>
-  /* Tab สไตล์เรียบง่าย */
-  .tab-container {
-    margin-bottom: 1.5rem;
-  }
+  /* Tab สไตล์เดิม */
+  .tab-container { margin-bottom: 1.5rem; }
   .tab-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -24,24 +22,85 @@
     font-weight: 600;
     transition: all 0.2s;
   }
-  .tab-button.active {
-    background: var(--primary);
-    color: white;
-  }
-  .tab-button:hover:not(.active) {
-    background: #e5e7eb;
-  }
-  .tab-content {
-    display: none;
-  }
-  .tab-content.active {
-    display: block;
-  }
+  .tab-button.active { background: var(--primary); color: white; }
+  .tab-button:hover:not(.active) { background: #e5e7eb; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
   .empty-category {
     text-align: center;
     color: #6b7280;
     padding: 2rem;
     font-style: italic;
+  }
+
+  /* ปรับช่องจำนวน + ปุ่ม + / – */
+  .qty-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+  }
+
+  .qty-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .qty-btn:hover { background: var(--primary-dark); }
+  .qty-btn:active { transform: scale(0.95); }
+
+  .qty-input {
+    width: 60px !important;
+    text-align: center;
+    padding: 0.5rem !important;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  /* สไตล์สำหรับแถวที่เลือก */
+  .product-row.selected {
+    background-color: #f0fdf4;
+    border-left: 4px solid #22c55e;
+  }
+
+  /* สไตล์ส่วนสรุปการเลือก */
+  .selected-summary {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+  }
+
+  .selected-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed #d1d5db;
+  }
+
+  .selected-item:last-child { border-bottom: none; }
+  .selected-item-name { flex: 1; font-weight: 500; }
+  .selected-item-qty { min-width: 80px; text-align: center; color: #2563eb; font-weight: 600; }
+  .selected-item-sub { min-width: 120px; text-align: right; font-weight: 600; color: #1e40af; }
+
+  @media (max-width: 576px) {
+    .qty-btn { width: 44px; height: 44px; font-size: 1.4rem; }
+    .qty-input { width: 70px !important; font-size: 1.1rem; }
+    .selected-item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+    .selected-item-qty, .selected-item-sub { text-align: left; min-width: auto; }
   }
 </style>
 {% endblock %}
@@ -61,6 +120,7 @@
 <form method="post" action="/order" class="order-form" id="orderForm">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+  <!-- ชื่อและเบอร์ -->
   <div class="form-group" style="margin-bottom:1.5rem;">
     <label for="name">ชื่อผู้สั่งซื้อ <span class="required" style="color:red;">*</span></label>
     <input type="text" id="name" name="name" required 
@@ -92,10 +152,9 @@
   <div class="products-section" style="margin:2rem 0;">
     <h3>เลือกสินค้า</h3>
 
-    <!-- Tab หมวดหมู่ (แสดงเฉพาะ "ของไหว้" เป็นหลัก) -->
+    <!-- Tab หมวดหมู่ -->
     <div class="tab-container">
       <div class="tab-buttons">
-        <!-- แท็บอื่น ๆ (ถ้าต้องการให้เห็น แต่เริ่มต้นที่ของไหว้) -->
         <button type="button" class="tab-button" data-tab="พวงมาลัย">พวงมาลัย</button>
         <button type="button" class="tab-button active" data-tab="ของไหว้">ของไหว้</button>
         <button type="button" class="tab-button" data-tab="น้ำ">น้ำ</button>
@@ -103,10 +162,8 @@
         <button type="button" class="tab-button" data-tab="all">ทั้งหมด</button>
       </div>
 
-      <!-- เนื้อหาแต่ละแท็บ -->
       {% for cat in ['พวงมาลัย', 'ของไหว้', 'น้ำ', 'อื่นๆ', 'all'] %}
         <div class="tab-content {% if cat == 'ของไหว้' %}active{% endif %}" id="tab-{{ cat }}">
-          
           {% set items = products if cat == 'all' else products|selectattr('category', 'equalto', cat)|list %}
           
           {% if items %}
@@ -117,7 +174,7 @@
                     <th class="check-col" style="padding:1rem; width:60px;">เลือก</th>
                     <th style="padding:1rem;">สินค้า</th>
                     <th class="price-col" style="padding:1rem; width:120px;">ราคา</th>
-                    <th class="qty-col" style="padding:1rem; width:120px;">จำนวน</th>
+                    <th class="qty-col" style="padding:1rem; width:140px;">จำนวน</th>
                     <th class="price-col" style="padding:1rem; width:120px;">รวม</th>
                   </tr>
                 </thead>
@@ -133,9 +190,12 @@
                     </td>
                     <td class="price-col" style="padding:1rem; text-align:right;">{{ p['price'] }} บาท</td>
                     <td class="qty-col" style="padding:1rem;">
-                      <input type="number" name="qty_{{ p['id'] }}" value="0" min="0" max="999" step="1" 
-                             class="qty-input" data-id="{{ p['id'] }}"
-                             style="width:80px; padding:0.5rem; text-align:center; border:1px solid #d1d5db; border-radius:4px;">
+                      <div class="qty-wrapper">
+                        <button type="button" class="qty-btn qty-minus" data-id="{{ p['id'] }}">-</button>
+                        <input type="number" name="qty_{{ p['id'] }}" value="0" min="0" max="999" step="1" 
+                               class="qty-input" data-id="{{ p['id'] }}">
+                        <button type="button" class="qty-btn qty-plus" data-id="{{ p['id'] }}">+</button>
+                      </div>
                     </td>
                     <td class="price-col subtotal" data-id="{{ p['id'] }}" style="padding:1rem; text-align:right;">0 บาท</td>
                   </tr>
@@ -156,8 +216,20 @@
       ยอดรวมทั้งสิ้น: <strong id="grandTotal">0 บาท</strong>
     </div>
 
+    <!-- ส่วนสรุปรายการที่เลือก (ใหม่) -->
+    <div class="selected-summary">
+      <h3 style="margin-top:0; color: #1e40af;">รายการที่คุณเลือก</h3>
+      <div id="selectedItemsList" style="min-height: 60px;"></div>
+      <div style="margin-top:1rem; text-align:right; font-size:1.3rem; font-weight:bold;">
+        ยอดรวม: <span id="summaryTotal">0 บาท</span>
+      </div>
+      <p id="noItemsHint" style="color:#6b7280; text-align:center; margin:1rem 0; display:none;">
+        ยังไม่มีรายการที่เลือก
+      </p>
+    </div>
+
     <p class="hint" style="color:#6b7280; font-size:0.95rem; margin:1rem 0;">
-      ※ เลือกสินค้าและระบุจำนวน หากไม่ต้องการให้ใส่ 0 หรือไม่ติ๊กเลือก
+      ※ เลือกสินค้าและปรับจำนวนด้วยปุ่ม +/– หรือพิมพ์เองได้
     </p>
     <p class="no-selection" id="noSelectionWarning" style="color:#ef4444; font-weight:600; display:none; text-align:center;">
       กรุณาเลือกอย่างน้อย 1 รายการ และจำนวนต้องมากกว่า 0
@@ -174,15 +246,21 @@
 </form>
 
 <script>
-// JavaScript เดิม + การจัดการ tab
+// JavaScript สำหรับจัดการการเลือก + สรุป
 const form = document.getElementById('orderForm');
 const submitBtn = document.getElementById('submitBtn');
 const grandTotalEl = document.getElementById('grandTotal');
+const summaryTotalEl = document.getElementById('summaryTotal');
+const selectedItemsList = document.getElementById('selectedItemsList');
+const noItemsHint = document.getElementById('noItemsHint');
 const warningEl = document.getElementById('noSelectionWarning');
 
 function updateTotals() {
   let total = 0;
   let hasSelection = false;
+
+  // ล้างรายการสรุปเก่าทิ้ง
+  selectedItemsList.innerHTML = '';
 
   document.querySelectorAll('.product-row').forEach(row => {
     const checkbox = row.querySelector('.product-check');
@@ -190,28 +268,71 @@ function updateTotals() {
     const subtotalEl = row.querySelector('.subtotal');
     const price = parseInt(row.dataset.price) || 0;
     const qty = parseInt(qtyInput.value) || 0;
+    const name = row.querySelector('label').textContent.trim();
 
+    const subtotal = price * qty;
+
+    // อัปเดต subtotal ในตาราง
+    subtotalEl.textContent = subtotal.toLocaleString('th-TH') + ' บาท';
+
+    // จัดการไฮไลต์แถว + เพิ่มในสรุป
     if (checkbox.checked && qty > 0) {
-      hasSelection = true;
       row.classList.add('selected');
+      hasSelection = true;
+      total += subtotal;
+
+      // สร้าง element สำหรับสรุป
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'selected-item';
+      itemDiv.innerHTML = `
+        <span class="selected-item-name">${name}</span>
+        <span class="selected-item-qty">× ${qty}</span>
+        <span class="selected-item-sub">${subtotal.toLocaleString('th-TH')} บาท</span>
+      `;
+      selectedItemsList.appendChild(itemDiv);
     } else {
       row.classList.remove('selected');
     }
-
-    const subtotal = price * qty;
-    subtotalEl.textContent = subtotal.toLocaleString('th-TH') + ' บาท';
-
-    if (checkbox.checked) total += subtotal;
   });
 
-  grandTotalEl.textContent = total.toLocaleString('th-TH') + ' บาท';
+  // อัปเดตยอดรวมทั้งสองจุด
+  const formattedTotal = total.toLocaleString('th-TH') + ' บาท';
+  grandTotalEl.textContent = formattedTotal;
+  summaryTotalEl.textContent = formattedTotal;
 
+  // แสดง/ซ่อนข้อความแจ้ง
+  noItemsHint.style.display = hasSelection ? 'none' : 'block';
   warningEl.style.display = hasSelection ? 'none' : 'block';
   submitBtn.disabled = !hasSelection;
   submitBtn.style.opacity = hasSelection ? '1' : '0.6';
 }
 
-// จัดการ tab (เริ่มต้นที่ "ของไหว้")
+// จัดการปุ่ม + และ –
+document.querySelectorAll('.qty-plus, .qty-minus').forEach(btn => {
+  ['click', 'touchend'].forEach(eventType => {
+    btn.addEventListener(eventType, (e) => {
+      e.preventDefault();
+      const id = btn.dataset.id;
+      const input = document.querySelector(`input[name="qty_${id}"]`);
+      if (!input) return;
+
+      let value = parseInt(input.value) || 0;
+
+      if (btn.classList.contains('qty-plus')) {
+        if (value < 999) value += 1;
+      } else {
+        if (value > 0) value -= 1;
+      }
+
+      input.value = value;
+      updateTotals();
+
+      if ('vibrate' in navigator) navigator.vibrate(15);
+    });
+  });
+});
+
+// จัดการ tab
 document.querySelectorAll('.tab-button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
@@ -225,12 +346,13 @@ document.querySelectorAll('.tab-button').forEach(btn => {
   });
 });
 
-// Event listeners เดิม
+// Event listeners อื่น ๆ
 document.querySelectorAll('.product-check, .qty-input').forEach(el => {
   el.addEventListener('change', updateTotals);
   el.addEventListener('input', updateTotals);
 });
 
+// ตรวจสอบก่อน submit
 form.addEventListener('submit', e => {
   const checked = document.querySelectorAll('input[name="product_id"]:checked');
   let valid = false;
@@ -246,6 +368,7 @@ form.addEventListener('submit', e => {
   }
 });
 
+// อัปเดตครั้งแรก
 updateTotals();
 </script>
 

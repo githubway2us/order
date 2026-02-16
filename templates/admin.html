@@ -1,236 +1,334 @@
 {% extends "base.html" %}
 
-{% block title %}แอดมิน - รายการออเดอร์{% endblock %}
+{% block title %}แอดมิน - จัดการออเดอร์{% endblock %}
 
 {% block head_extra %}
 <style>
-/* container */
-.page-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1rem;
-}
+  :root {
+    --pending: #f59e0b;
+    --confirmed: #3b82f6;
+    --preparing: #8b5cf6;
+    --completed: #10b981;
+  }
 
-/* header */
-.page-header {
-  margin-bottom: 1.5rem;
+  .page-container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .stats-overview {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-width: 140px;
+    flex: 1;
+    text-align: center;
+    border-top: 4px solid #9ca3af;
+  }
+
+  .stat-pending   { border-top-color: var(--pending); }
+  .stat-confirmed { border-top-color: var(--confirmed); }
+  .stat-preparing { border-top-color: var(--preparing); }
+  .stat-completed { border-top-color: var(--completed); }
+
+  .stat-value { font-size: 2rem; font-weight: 700; }
+
+  /* Tabs */
+  .tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .tab-btn {
+    padding: 0.7rem 1.4rem;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: white;
+    border-bottom: 4px solid;
+  }
+
+  .tab-btn[data-tab="pending"].active   { border-bottom-color: var(--pending); color: var(--pending); }
+  .tab-btn[data-tab="confirmed"].active { border-bottom-color: var(--confirmed); color: var(--confirmed); }
+  .tab-btn[data-tab="preparing"].active { border-bottom-color: var(--preparing); color: var(--preparing); }
+  .tab-btn[data-tab="completed"].active { border-bottom-color: var(--completed); color: var(--completed); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Order card */
+  .order-item {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .order-summary {
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: #f8fafc;
+  }
+
+  .order-summary:hover { background: #f1f5f9; }
+
+  .order-details {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .status-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-pending    { background: #fef3c7; color: #92400e; }
+  .badge-confirmed  { background: #dbeafe; color: #1e40af; }
+  .badge-preparing  { background: #f3e8ff; color: #6b21a8; }
+  .badge-completed  { background: #d1fae5; color: #065f46; }
+
+  /* Action buttons */
+  .action-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    color: white;
+  }
+
+  .btn-confirm   { background: var(--confirmed); }
+  .btn-prepare   { background: var(--preparing); }
+  .btn-complete  { background: var(--completed); }
+
+  .action-btn:hover { opacity: 0.9; }
+  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .empty-state {
+    text-align: center;
+    padding: 5rem 1rem;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 12px;
+  }
+
+  .empty-icon { font-size: 5rem; margin-bottom: 1rem; }
+  /* Search box */
+.search-box {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
-/* stats */
-.stats-overview {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
+.search-input {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  width: 180px;
+  transition: 0.2s;
 }
 
-.stat-card {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  min-width: 140px;
-  flex: 1;
-  text-align: center;
+.search-input:focus {
+  border-color: var(--confirmed);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
 }
 
-.stat-card.highlight {
-  background: #eff6ff;
-  border: 1px solid #3b82f6;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-.stat-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-/* order item */
-.order-item {
-  background: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-}
-
-/* summary */
-.order-summary {
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background: #f9fafb;
-  user-select: none;
-}
-
-.order-summary:hover {
-  background: #f3f4f6;
-}
-
-.order-summary:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: -2px;
-}
-
-/* status badge */
-.status-badge {
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.status-pending   { background: #fef3c7; color: #92400e; }
-.status-confirmed { background: #d1fae5; color: #065f46; }
-.status-other     { background: #e5e7eb; color: #374151; }
-
-/* details */
-.order-details {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-/* table */
-.order-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.order-table th,
-.order-table td {
-  padding: 0.8rem 0.6rem;
-  text-align: left;
-}
-
-.order-table th {
-  background: #f3f4f6;
-  font-weight: 600;
-  color: #374151;
-}
-
-.text-right { text-align: right; }
-.text-center { text-align: center; }
-
-/* total row */
-.total-row {
-  font-weight: bold;
-  background: #f9fafb;
-  border-top: 2px solid #d1d5db;
-}
-
-/* empty */
-.empty-state {
-  text-align: center;
-  padding: 5rem 1rem;
-  color: #6b7280;
-}
-
-.empty-icon {
-  font-size: 5rem;
-  margin-bottom: 1.5rem;
-}
-
-.btn {
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  padding: 0.7rem 1.5rem;
-}
-
-.btn-success {
-  background: #10b981;
+.search-btn {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.btn-success:hover {
-  background: #059669;
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(59,130,246,0.25);
 }
+
+.search-btn:active {
+  transform: translateY(0);
+}
+
 </style>
 
-<!-- SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.12.4/sweetalert2.all.min.js"></script>
 {% endblock %}
 
 {% block content %}
 
 <div class="page-container">
 
-  <div class="page-header">
-    <h1>รายการออเดอร์ทั้งหมด</h1>
-  </div>
+<div class="page-header">
+  <h1>จัดการออเดอร์</h1>
+
+  <form class="search-box" onsubmit="goToOrder(event)">
+    <input 
+      type="number" 
+      id="orderIdInput"
+      class="search-input"
+      placeholder="🔎 Order ID"
+      required
+    >
+    <button type="submit" class="search-btn">
+      ค้นหา
+    </button>
+  </form>
+
+</div>
+
 
   <div class="stats-overview">
-    <div class="stat-card">
-      <div class="stat-label">ออเดอร์ทั้งหมด</div>
-      <div class="stat-value">{{ total_orders }}</div>
+    <div class="stat-card stat-pending">
+      <div class="stat-label">รอยืนยัน</div>
+      <div class="stat-value">{{ pending_count|default(0) }}</div>
     </div>
-
-    <div class="stat-card highlight">
-      <div class="stat-label">ยอดรวมทั้งระบบ</div>
-      <div class="stat-value">{{ total_revenue|int }} บาท</div>
+    <div class="stat-card stat-confirmed">
+      <div class="stat-label">ยืนยันแล้ว</div>
+      <div class="stat-value">{{ confirmed_count|default(0) }}</div>
+    </div>
+    <div class="stat-card stat-preparing">
+      <div class="stat-label">กำลังจัดของ</div>
+      <div class="stat-value">{{ preparing_count|default(0) }}</div>
+    </div>
+    <div class="stat-card stat-completed">
+      <div class="stat-label">ปิดจ๊อบ</div>
+      <div class="stat-value">{{ completed_count|default(0) }}</div>
     </div>
   </div>
 
-  {% if orders %}
-    <div class="orders-list">
-      {% for order_id, order in orders|dictsort(reverse=true) %}
-        <details class="order-item" id="order-{{ order.id }}">
-          <summary class="order-summary" tabindex="0" aria-label="ออเดอร์หมายเลข {{ order.id }} - {{ order.customer_name }}">
+  <!-- Tabs -->
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-tab="pending">รอยืนยัน</button>
+    <button class="tab-btn" data-tab="confirmed">ยืนยันแล้ว</button>
+    <button class="tab-btn" data-tab="preparing">กำลังจัดของ</button>
+    <button class="tab-btn" data-tab="completed">ปิดจ๊อบ</button>
+  </div>
+
+  <!-- Tab: รอยืนยัน -->
+<div class="tab-content active" id="tab-pending"
+     hx-get="/admin/orders/pending-partial"
+     hx-trigger="every 15s"
+     hx-swap="innerHTML">
+    {% if pending_orders %}
+      {% for order_id, order in pending_orders|dictsort(reverse=true) %}
+        {% with %}
+          {% set next_status = 'confirmed' %}
+          {% set action_text = 'ยืนยันรับออเดอร์' %}
+          {% set action_class = 'btn-confirm' %}
+          {% include 'admin_order_card.html' %}
+        {% endwith %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <h3>ไม่มีออเดอร์รอยืนยัน</h3>
+        <p>ออเดอร์ใหม่จะปรากฏที่นี่</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab: ยืนยันแล้ว -->
+  <div class="tab-content" id="tab-confirmed">
+    {% if confirmed_orders %}
+      {% for order_id, order in confirmed_orders|dictsort(reverse=true) %}
+        {% with %}
+          {% set next_status = 'preparing' %}
+          {% set action_text = 'จัดของเสร็จแล้ว' %}
+          {% set action_class = 'btn-prepare' %}
+          {% include 'admin_order_card.html' %}
+        {% endwith %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>ไม่มีออเดอร์ที่ยืนยันแล้ว</h3>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab: กำลังจัดของ -->
+  <div class="tab-content" id="tab-preparing">
+    {% if preparing_orders %}
+      {% for order_id, order in preparing_orders|dictsort(reverse=true) %}
+        {% with %}
+          {% set next_status = 'completed' %}
+          {% set action_text = 'ปิดจ๊อบ / ส่งเรียบร้อย' %}
+          {% set action_class = 'btn-complete' %}
+          {% include 'admin_order_card.html' %}
+        {% endwith %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>ไม่มีออเดอร์กำลังจัดของ</h3>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab: ปิดจ๊อบ -->
+  <div class="tab-content" id="tab-completed">
+    {% if completed_orders %}
+      {% for order_id, order in completed_orders|dictsort(reverse=true) %}
+        <div class="order-item">
+          <div class="order-summary">
             <div>
               <strong>Order #{{ order.id }}</strong><br>
               <span style="color:#4b5563;">{{ order.customer_name|e }}</span>
             </div>
-
-            <div class="text-right" style="min-width:200px;">
+            <div class="text-right" style="min-width:220px;">
               <div>📞 {{ order.phone|e }}</div>
               <div>🕒 {{ order.created_at|dateformat }}</div>
-              <div style="margin-top:0.5rem; font-size:1.1rem;">
-                <strong>{{ order.total|int }} บาท</strong>
+              <div style="margin-top:0.5rem; font-size:1.2rem;">
+                <strong>{{ order.total|int|default(0) }} บาท</strong>
               </div>
             </div>
-
             <div style="width:100%; margin-top:0.75rem; text-align:center;">
-              {% if order.status == 'pending' %}
-                <span class="status-badge status-pending">⏳ รอยืนยัน</span>
-              {% elif order.status == 'confirmed' %}
-                <span class="status-badge status-confirmed">✅ ยืนยันแล้ว</span>
-              {% else %}
-                <span class="status-badge status-other">{{ order.status|default('ไม่ระบุ')|e }}</span>
-              {% endif %}
+              <span class="status-badge badge-completed">✓ ปิดจ๊อบแล้ว</span>
             </div>
-          </summary>
-
+          </div>
           <div class="order-details">
-
-            {% if order.status == 'pending' %}
-              <div style="margin-bottom:1.5rem; text-align:right;">
-                <form action="{{ url_for('confirm_order', order_id=order.id) }}" method="POST" id="confirm-form-{{ order.id }}">
-                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                  <button type="button" class="btn btn-success"
-                         onclick="confirmOrder({{ order.id }}, {{ order.customer_name|tojson }});">
-
-                    ยืนยันรับออเดอร์นี้
-                  </button>
-                </form>
-              </div>
-            {% endif %}
-
             <table class="order-table">
               <thead>
                 <tr>
@@ -249,51 +347,116 @@
                     <td class="text-right">{{ item.subtotal|int }} บาท</td>
                   </tr>
                 {% else %}
-                  <tr>
-                    <td colspan="4" class="text-center">ไม่มีรายการสินค้าในออเดอร์นี้</td>
-                  </tr>
+                  <tr><td colspan="4" class="text-center">ไม่มีรายการสินค้า</td></tr>
                 {% endfor %}
-
                 <tr class="total-row">
                   <td colspan="3" class="text-right">ยอดรวมทั้งออเดอร์</td>
-                  <td class="text-right">{{ order.total|int }} บาท</td>
+                  <td class="text-right">{{ order.total|int|default(0) }} บาท</td>
                 </tr>
               </tbody>
             </table>
-
           </div>
-        </details>
+        </div>
       {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-icon">📭</div>
-      <h3>ยังไม่มีออเดอร์ในระบบ</h3>
-      <p>เมื่อมีลูกค้าสั่งซื้อ ออเดอร์จะปรากฏที่นี่ทันที</p>
-    </div>
-  {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🏁</div>
+        <h3>ยังไม่มีออเดอร์ที่ปิดจ๊อบ</h3>
+      </div>
+    {% endif %}
+  </div>
 
 </div>
 
 <script>
-// SweetAlert confirmation
-function confirmOrder(orderId, customerName) {
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// Status change handler
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('action-btn')) return;
+  
+  e.preventDefault();
+  
+  const btn = e.target;
+  if (btn.disabled) return;
+
+  const form = btn.closest('form');
+  const orderId = btn.dataset.orderId;
+  const customerName = btn.dataset.customerName;
+  const nextStatus = btn.dataset.nextStatus;
+
+  let titleText = '';
+  switch(nextStatus) {
+    case 'confirmed':  titleText = 'ยืนยันรับออเดอร์'; break;
+    case 'preparing':  titleText = 'ยืนยันว่าจัดของเสร็จแล้ว'; break;
+    case 'completed':  titleText = 'ปิดจ๊อบออเดอร์นี้'; break;
+    default: titleText = 'เปลี่ยนสถานะ';
+  }
+
   Swal.fire({
-    title: 'ยืนยันรับออเดอร์?',
-    html: `คุณต้องการยืนยันออเดอร์ <strong>#${orderId}</strong><br>ของ <strong>${customerName}</strong> ใช่หรือไม่?`,
+    title: titleText + ' ?',
+    html: `Order <strong>#${orderId}</strong><br>ลูกค้า: <strong>${customerName}</strong>`,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#10b981',
+    confirmButtonColor: btn.style.backgroundColor || '#10b981',
     cancelButtonColor: '#ef4444',
-    confirmButtonText: 'ใช่, ยืนยัน',
-    cancelButtonText: 'ยกเลิก',
-    reverseButtons: true
+    confirmButtonText: 'ใช่, ดำเนินการ',
+    cancelButtonText: 'ยกเลิก'
   }).then((result) => {
     if (result.isConfirmed) {
-      document.getElementById(`confirm-form-${orderId}`).submit();
+      form.submit();
     }
   });
+});
+
+// Auto-refresh pending tab + count
+function refreshPending() {
+  fetch('/admin/orders/pending-update')
+    .then(response => {
+      if (!response.ok) throw new Error('Network error');
+      return response.json();
+    })
+    .then(data => {
+      // อัปเดตจำนวนรอยืนยัน
+      document.querySelector('.stat-pending .stat-value').textContent = data.pending_count || 0;
+
+      // อัปเดตเนื้อหารายการใน tab รอยืนยัน
+      const pendingTab = document.getElementById('tab-pending');
+      if (pendingTab) {
+        pendingTab.innerHTML = data.pending_html;
+      }
+
+      console.log('Pending orders updated:', data.pending_count);
+    })
+    .catch(error => {
+      console.error('Pending refresh error:', error);
+    });
 }
+
+// เริ่ม polling ทุก 15 วินาที
+setInterval(refreshPending, 15000);
+
+// โหลดครั้งแรก
+window.addEventListener('load', refreshPending);
+
+function goToOrder(e){
+  e.preventDefault();
+  const orderId = document.getElementById("orderIdInput").value.trim();
+
+  if(!orderId) return;
+
+  window.location.href = "/admin/order/" + orderId;
+}
+
 </script>
 
 {% endblock %}

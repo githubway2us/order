@@ -65,10 +65,17 @@
     font-size: 1.1rem;
     font-weight: 600;
     width: 100%;
+    cursor: pointer;
   }
 
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     background: var(--primary-dark);
+  }
+
+  .btn-primary:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 
   .text-link {
@@ -89,6 +96,20 @@
     color: #6b7280;
     margin-top: 0.25rem;
     display: block;
+  }
+
+  .terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #374151;
+  }
+
+  .terms-checkbox input {
+    margin-top: 0.25rem;
   }
 
   @media (max-width: 576px) {
@@ -124,7 +145,7 @@
         {% endif %}
       {% endwith %}
 
-      <form method="POST" action="{{ url_for('register') }}">
+      <form method="POST" action="{{ url_for('register') }}" id="registerForm">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="form-group">
@@ -191,8 +212,17 @@
           >
         </div>
 
+        <!-- ติ๊กยอมรับเงื่อนไข -->
+        <div class="terms-checkbox">
+          <input type="checkbox" id="acceptTerms" name="accept_terms" required>
+          <label for="acceptTerms">
+            ฉันยอมรับ <a href="{{ url_for('terms') }}" target="_blank" class="text-link">เงื่อนไขการใช้งาน</a> 
+            และ <a href="{{ url_for('privacy') }}" target="_blank" class="text-link">นโยบายความเป็นส่วนตัว (PDPA)</a>
+          </label>
+        </div>
+
         <div class="d-grid mt-4">
-          <button type="submit" class="btn btn-primary btn-lg">
+          <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
             สมัครสมาชิก
           </button>
         </div>
@@ -209,5 +239,24 @@
   </div>
 
 </div>
+
+<script>
+// เปิด/ปิดปุ่มสมัครตามการติ๊กยอมรับ
+const acceptCheckbox = document.getElementById('acceptTerms');
+const submitBtn = document.getElementById('submitBtn');
+
+acceptCheckbox.addEventListener('change', () => {
+  submitBtn.disabled = !acceptCheckbox.checked;
+  submitBtn.style.opacity = acceptCheckbox.checked ? '1' : '0.6';
+});
+
+// ถ้าไม่ได้ติ๊ก แต่กด submit (ป้องกันกรณี JS ถูกปิด)
+document.getElementById('registerForm').addEventListener('submit', (e) => {
+  if (!acceptCheckbox.checked) {
+    e.preventDefault();
+    alert('กรุณายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก');
+  }
+});
+</script>
 
 {% endblock %}

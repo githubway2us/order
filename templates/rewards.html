@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}แลกแต้ม / Rewards{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; margin: 0 auto; padding: 2rem 1rem;">
+
+  <h1 style="text-align: center; margin-bottom: 2.5rem;">แลกแต้มสะสมเป็นของรางวัล</h1>
+
+  <!-- สรุปแต้มปัจจุบัน -->
+  <div style="background: linear-gradient(135deg, #f3e8ff, #e0f2fe); border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 3rem; box-shadow: 0 6px 20px rgba(0,0,0,0.1);">
+    <h2 style="margin: 0 0 1rem; color: #6b21a8;">แต้มที่มีอยู่</h2>
+    <div style="font-size: 4.5rem; font-weight: bold; color: #7c3aed;">
+      {{ available_points|default(0) }}
+    </div>
+    <p style="font-size: 1.3rem; color: #4b5563; margin: 0.5rem 0;">
+      แต้มที่ใช้ได้ • อัปเดตเมื่อ {{ current_time|default('ตอนนี้') }}
+    </p>
+    <small style="color: #6b7280;">
+      ได้รับทั้งหมด: {{ earned_points|default(0) }} แต้ม • ใช้ไปแล้ว: {{ redeemed_points|default(0) }} แต้ม
+    </small>
+  </div>
+
+  <!-- รายการรางวัล -->
+  <h2 style="margin: 2.5rem 0 1.5rem; text-align: center;">รางวัลที่แลกได้</h2>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.8rem;">
+    <!-- รางวัลตัวอย่าง 1 -->
+    <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.2s;">
+      <img src="https://images.unsplash.com/photo-1606857521015-7f9fcf423740?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+           alt="น้ำดื่มแพ็คใหญ่" style="width:100%; height:180px; object-fit: cover;">
+      <div style="padding: 1.5rem;">
+        <h3 style="margin: 0 0 0.75rem;">น้ำดื่มตราช้าง 350ml แพ็ค 24 ขวด</h3>
+        <p style="color: #6b7280; margin: 0 0 1rem;">มูลค่า 120 บาท</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 1.4rem; font-weight: bold; color: #7c3aed;">150 แต้ม</span>
+          {% if available_points >= 150 %}
+            <form action="/redeem" method="POST" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="reward_id" value="1">
+              <button type="submit" class="btn btn-success" style="padding: 0.7rem 1.4rem;">
+                แลกเลย
+              </button>
+            </form>
+          {% else %}
+            <button disabled class="btn" style="background:#d1d5db; color:#6b7280; padding:0.7rem 1.4rem;">
+              แต้มไม่พอ
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- รางวัลตัวอย่าง 2 -->
+    <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.2s;">
+      <img src="https://images.unsplash.com/photo-1622484212850-eb596d0f9512?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+           alt="พวงมาลัยใหญ่" style="width:100%; height:180px; object-fit: cover;">
+      <div style="padding: 1.5rem;">
+        <h3 style="margin: 0 0 0.75rem;">พวงมาลัยดอกมะลิพรีเมียม ขนาดใหญ่</h3>
+        <p style="color: #6b7280; margin: 0 0 1rem;">มูลค่า 350 บาท</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 1.4rem; font-weight: bold; color: #7c3aed;">400 แต้ม</span>
+          {% if available_points >= 400 %}
+            <form action="/redeem" method="POST" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="reward_id" value="2">
+              <button type="submit" class="btn btn-success" style="padding: 0.7rem 1.4rem;">
+                แลกเลย
+              </button>
+            </form>
+          {% else %}
+            <button disabled class="btn" style="background:#d1d5db; color:#6b7280; padding:0.7rem 1.4rem;">
+              แต้มไม่พอ
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- เพิ่มรางวัลอื่น ๆ ได้ตามต้องการ -->
+    <!-- ... -->
+  </div>
+
+  <!-- ประวัติการแลก (ถ้ามี) -->
+  {% if redeemed_history %}
+    <h2 style="margin: 3rem 0 1.5rem; text-align: center;">ประวัติการแลกของรางวัล</h2>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-md);">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f3f4f6;">
+            <th style="padding: 1rem; text-align: left;">วันที่</th>
+            <th style="padding: 1rem; text-align: left;">รางวัล</th>
+            <th style="padding: 1rem; text-align: right;">แต้มที่ใช้</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in redeemed_history %}
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+              <td style="padding: 1rem;">{{ item.redeemed_at|dateformat }}</td>
+              <td style="padding: 1rem;">{{ item.reward_name }}</td>
+              <td style="padding: 1rem; text-align: right; color: #ef4444;">-{{ item.points_used }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
