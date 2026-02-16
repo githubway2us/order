@@ -22,9 +22,7 @@
       --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -67,22 +65,33 @@
       text-decoration: none;
     }
 
-    .site-title:hover {
-      color: var(--primary-dark);
-    }
+    .site-title:hover { color: var(--primary-dark); }
 
-    main {
-      padding: 2rem 0;
-    }
+    main { padding: 2rem 0; }
 
     footer {
       background: var(--white);
       border-top: 1px solid var(--border);
-      padding: 2rem 0 1rem;
-      margin-top: 3rem;
+      padding: 2.5rem 0 1.5rem;
+      margin-top: 4rem;
       text-align: center;
       color: var(--gray);
       font-size: 0.9rem;
+    }
+
+    .footer-links {
+      margin: 1rem 0;
+    }
+
+    .footer-links a {
+      color: var(--gray);
+      margin: 0 0.75rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
     }
 
     /* ปุ่มทั่วไป */
@@ -97,38 +106,21 @@
       border: none;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
+    .btn-primary       { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
 
-    .btn-success {
-      background: var(--success);
-      color: white;
-    }
-    .btn-success:hover {
-      background: var(--success-dark);
-    }
+    .btn-success       { background: var(--success); color: white; }
+    .btn-success:hover { background: var(--success-dark); }
 
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-    }
-    .btn-danger:hover {
-      background: #dc2626;
-    }
+    .btn-danger        { background: var(--danger); color: white; }
+    .btn-danger:hover  { background: #dc2626; }
 
     .btn-outline {
       background: transparent;
       border: 1px solid var(--primary);
       color: var(--primary);
     }
-    .btn-outline:hover {
-      background: rgba(59,130,246,0.1);
-    }
+    .btn-outline:hover { background: rgba(59,130,246,0.1); }
 
     /* การแจ้งเตือน */
     .alert {
@@ -150,41 +142,51 @@
       border: 1px solid #fecaca;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 640px) {
-      main {
-        padding: 1.5rem 0;
-      }
-      .header-inner {
-        flex-direction: column;
-        text-align: center;
-      }
-    }
+    /* Navigation */
     .header-nav {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-.nav-link {
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  transition: 0.2s;
-}
+    .nav-link {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      transition: 0.2s;
+    }
 
-.nav-link:hover {
-  background: rgba(59,130,246,0.1);
-}
+    .nav-link:hover {
+      background: rgba(59,130,246,0.1);
+    }
 
-.nav-link.active {
-  background: var(--primary);
-  color: white;
-}
+    .nav-link.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
 
+    .user-greeting {
+      font-weight: 600;
+      color: var(--primary-dark);
+      padding: 0.6rem 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main { padding: 1.5rem 0; }
+      .header-inner { flex-direction: column; text-align: center; }
+      .header-nav { justify-content: center; }
+      .footer-links a { margin: 0.5rem; display: block; }
+    }
+
+    .text-end {
+      font-variant-numeric: tabular-nums;  /* ตัวเลขเรียงตรง */
+    }
   </style>
 
   {% block head_extra %}{% endblock %}
@@ -193,40 +195,95 @@
 
   <header>
     <div class="container header-inner">
-      <a href="/" class="site-title">ระบบสั่งออเดอร์สินค้า</a>
-      
-<nav class="header-nav">
-  {% block nav %}
-  <a href="/" 
-     class="nav-link {% if request.path == '/' %}active{% endif %}">
-     หน้าแรก
-  </a>
+      <a href="/" class="site-title">ระบบสั่งออเดอร์สินค้า </a>
 
-  <a href="/admin" 
-     class="nav-link {% if request.path == '/admin' %}active{% endif %}">
-     ดูออเดอร์
-  </a>
+      <nav class="header-nav">
 
-  <a href="/admin/products" 
-     class="nav-link {% if '/admin/product' in request.path %}active{% endif %}">
-     จัดการสินค้า
-  </a>
-  {% endblock %}
-</nav>
+        <!-- เมนูที่ทุกคนเห็น -->
+        <a href="/" 
+           class="nav-link {% if request.path == '/' %}active{% endif %}">
+          หน้าแรก
+        </a>
 
+        <!-- เมนูสำหรับผู้ใช้ที่ล็อกอินแล้ว (ทั้ง user และ admin) -->
+        {% if session.username %}
+          <a href="/my-orders" 
+             class="nav-link {% if request.path == '/my-orders' %}active{% endif %}">
+            ออเดอร์ของฉัน
+          </a>
 
+          <a href="/profile" 
+             class="nav-link {% if request.path == '/profile' %}active{% endif %}">
+            โปรไฟล์
+          </a>
+
+          <!-- เมนูเฉพาะแอดมิน -->
+          {% if session.is_admin %}
+            <a href="/admin" 
+               class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+              ดูออเดอร์ทั้งหมด
+            </a>
+
+            <a href="/admin/products" 
+               class="nav-link {% if request.path.startswith('/admin/products') or request.path.startswith('/admin/product') %}active{% endif %}">
+              จัดการสินค้า
+            </a>
+          {% endif %}
+
+          <span class="user-greeting">สวัสดี {{ session.username }}</span>
+
+          <a href="/logout" 
+             class="nav-link btn-danger" 
+             style="color:white; border:none;">
+            ออกจากระบบ
+          </a>
+        {% else %}
+          <!-- ยังไม่ล็อกอิน -->
+          <a href="/login" 
+             class="nav-link {% if request.path == '/login' %}active{% endif %}">
+            เข้าสู่ระบบ
+          </a>
+
+          <a href="/register" 
+             class="nav-link {% if request.path == '/register' %}active{% endif %}">
+            สมัครสมาชิก
+          </a>
+        {% endif %}
+
+      </nav>
     </div>
   </header>
 
   <main class="container">
-    {% block content %}
-      <!-- เนื้อหาหลักของแต่ละหน้า จะถูกแทนที่ตรงนี้ -->
-    {% endblock %}
+
+    <!-- แสดง flash message (ถ้ามี) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; {{ current_year }} ระบบสั่งซื้อสินค้า • พัฒนาโดย Geotran Manss</p>
+      <p>© {{ current_year }} ระบบสั่งซื้อสินค้า • พัฒนาโดย Geotran Manss</p>
+      
+      <div class="footer-links">
+        <a href="/privacy">นโยบายความเป็นส่วนตัว (PDPA)</a> •
+        <a href="/terms">ข้อกำหนดและเงื่อนไข</a> •
+        <a href="/contact">ติดต่อเรา</a>
+      </div>
+
+      <p style="margin-top:1rem; font-size:0.85rem; color:#9ca3af;">
+        เว็บไซต์นี้มีการใช้งานคุกกี้เพื่อพัฒนาประสบการณ์การใช้งานและการวิเคราะห์ข้อมูล 
+        การใช้งานเว็บไซต์ต่อไปถือว่าท่านยอมรับ <a href="/privacy" style="color:var(--primary);">นโยบายความเป็นส่วนตัว</a>
+      </p>
     </div>
   </footer>
 

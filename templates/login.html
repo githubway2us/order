@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}เข้าสู่ระบบ{% endblock %}
+
+{% block head_extra %}
+<style>
+  .login-container {
+    max-width: 420px;
+    margin: 4rem auto 2rem;
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: var(--primary);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .card-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border: none;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .text-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .text-link:hover {
+    text-decoration: underline;
+  }
+
+  .alert {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 576px) {
+    .login-container {
+      margin: 2rem 1rem;
+      padding: 0 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="login-container">
+
+  <div class="login-card">
+
+    <div class="card-header">
+      <h3 class="mb-0">เข้าสู่ระบบ</h3>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ msg }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="mb-4">
+          <label for="username" class="form-label">ชื่อผู้ใช้</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="username" 
+            name="username" 
+            placeholder="เช่น geotranmanss หรือ admin"
+            required 
+            autofocus
+          >
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="form-label">รหัสผ่าน</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            id="password" 
+            name="password" 
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <div class="d-grid mb-4">
+          <button type="submit" class="btn btn-primary btn-lg">
+            เข้าสู่ระบบ
+          </button>
+        </div>
+
+        <div class="text-center small">
+          <p class="mb-2">
+            ยังไม่มีบัญชี? 
+            <a href="{{ url_for('register') }}" class="text-link">สมัครสมาชิก</a>
+          </p>
+          <!-- ถ้าจะเพิ่มฟีเจอร์ลืมรหัสผ่านในอนาคต -->
+          <!-- <a href="#" class="text-muted">ลืมรหัสผ่าน?</a> -->
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

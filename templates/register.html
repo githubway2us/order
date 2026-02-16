@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}สมัครสมาชิก{% endblock %}
+
+{% block head_extra %}
+<style>
+  .register-container {
+    max-width: 420px;
+    margin: 4rem auto 2rem;
+  }
+
+  .register-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: var(--primary);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .card-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+  }
+
+  .required {
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border: none;
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .text-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .text-link:hover {
+    text-decoration: underline;
+  }
+
+  .alert {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-hint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  @media (max-width: 576px) {
+    .register-container {
+      margin: 2rem 1rem;
+      padding: 0 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="register-container">
+
+  <div class="register-card">
+
+    <div class="card-header">
+      <h3 class="mb-0">สมัครสมาชิก</h3>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+              {{ msg }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label for="username" class="form-label">ชื่อผู้ใช้ <span class="required">*</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="username" 
+            name="username" 
+            placeholder="เช่น geotranmanss"
+            required 
+            autofocus
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">อีเมล <span class="required">*</span></label>
+          <input 
+            type="email" 
+            class="form-control" 
+            id="email" 
+            name="email" 
+            placeholder="เช่น example@email.com"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="phone" class="form-label">เบอร์โทรศัพท์ <span class="required">*</span></label>
+          <input 
+            type="tel" 
+            class="form-control" 
+            id="phone" 
+            name="phone" 
+            placeholder="เช่น 0812345678"
+            pattern="[0-9]{9,10}"
+            inputmode="numeric"
+            required
+          >
+          <small class="form-hint">ใช้เบอร์จริงเพื่อให้ร้านติดต่อกลับได้</small>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">รหัสผ่าน <span class="required">*</span></label>
+          <input 
+            type="password" 
+            class="form-control" 
+            id="password" 
+            name="password" 
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password2" class="form-label">ยืนยันรหัสผ่าน <span class="required">*</span></label>
+          <input 
+            type="password" 
+            class="form-control" 
+            id="password2" 
+            name="password2" 
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-primary btn-lg">
+            สมัครสมาชิก
+          </button>
+        </div>
+
+        <div class="text-center mt-4 small">
+          <p class="mb-0">
+            มีบัญชีแล้ว? 
+            <a href="{{ url_for('login') }}" class="text-link">เข้าสู่ระบบ</a>
+          </p>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,30 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}สั่งซื้อสินค้า{% endblock %}
+{% block title %}แก้ไขสินค้า - {{ product['name'] }}{% endblock %}
+
+{% block head_extra %}
+<style>
+  .edit-form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: white;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background: var(--success-dark);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: rgba(59,130,246,0.1);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<h1>แก้ไขสินค้า</h1>
 
-<div class="card">
+<div class="edit-form-container">
+
+  <h2 style="margin-bottom: 1.5rem;">แก้ไขสินค้า ID: {{ product['id'] }}</h2>
 
   {% if error %}
-    <div class="error-message">{{ error }}</div>
+    <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+      {{ error }}
+    </div>
   {% endif %}
 
-  <form method="post">
+  <form method="POST" action="">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <div class="form-group">
-      <label for="name">ชื่อสินค้า</label>
+      <label for="name">ชื่อสินค้า <span style="color:red;">*</span></label>
       <input type="text" id="name" name="name" value="{{ product['name'] }}" required>
     </div>
 
     <div class="form-group">
-      <label for="price">ราคา (บาท)</label>
-      <input type="number" id="price" name="price" value="{{ product['price'] }}" min="0" required>
+      <label for="price">ราคา (บาท) <span style="color:red;">*</span></label>
+      <input type="number" id="price" name="price" value="{{ product['price'] }}" required min="0">
     </div>
 
-    <div class="button-group">
-      <button type="submit" class="submit-btn">บันทึกการแก้ไข</button>
-      <a href="/admin/products" class="cancel-link">ยกเลิก</a>
+    <div class="form-group">
+      <label for="category">หมวดหมู่ <span style="color:red;">*</span></label>
+      <select id="category" name="category" required>
+        <option value="พวงมาลัย" {% if product['category'] == 'พวงมาลัย' %}selected{% endif %}>พวงมาลัย</option>
+        <option value="ของไหว้" {% if product['category'] == 'ของไหว้' %}selected{% endif %}>ของไหว้</option>
+        <option value="น้ำ" {% if product['category'] == 'น้ำ' %}selected{% endif %}>น้ำ</option>
+        <option value="อื่นๆ" {% if product['category'] == 'อื่นๆ' or product['category'] is none %}selected{% endif %}>อื่นๆ</option>
+      </select>
+    </div>
+
+    <div class="btn-group">
+      <button type="submit" class="btn btn-success">บันทึกการแก้ไข</button>
+      <a href="{{ url_for('admin_products') }}" class="btn btn-outline">ยกเลิก</a>
     </div>
   </form>
 

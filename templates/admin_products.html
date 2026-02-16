@@ -1,62 +1,72 @@
 {% extends "base.html" %}
 
-{% block title %}สั่งซื้อสินค้า{% endblock %}
+{% block title %}จัดการสินค้า{% endblock %}
 
 {% block content %}
-<h1>จัดการสินค้า</h1>
+<h2>จัดการสินค้า</h2>
 
 {% if success %}
-  <div class="message success">{{ success }}</div>
+  <div class="alert alert-success">{{ success }}</div>
 {% endif %}
 {% if error %}
-  <div class="message error">{{ error }}</div>
+  <div class="alert alert-danger">{{ error }}</div>
 {% endif %}
 
-<div class="card">
-  <h3>เพิ่มสินค้าใหม่</h3>
-  <form method="post" action="/admin/product/add" class="add-form">
-    <input type="text" name="name" placeholder="ชื่อสินค้า" required>
-    <input type="number" name="price" min="0" placeholder="ราคา (บาท)" required>
-    <button type="submit">เพิ่มสินค้า</button>
-  </form>
-</div>
+<!-- ฟอร์มเพิ่มสินค้าใหม่ -->
+<h3>เพิ่มสินค้าใหม่</h3>
+<form method="POST" action="/admin/product/add" style="max-width:500px; margin-bottom:3rem;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div style="margin-bottom:1rem;">
+    <label>ชื่อสินค้า</label>
+    <input type="text" name="name" required style="width:100%; padding:0.6rem;">
+  </div>
+  
+  <div style="margin-bottom:1rem;">
+    <label>ราคา (บาท)</label>
+    <input type="number" name="price" required min="0" style="width:100%; padding:0.6rem;">
+  </div>
+  
+  <div style="margin-bottom:1rem;">
+    <label>หมวดหมู่</label>
+    <select name="category" style="width:100%; padding:0.6rem;">
+      <option value="พวงมาลัย">พวงมาลัย</option>
+      <option value="ของไหว้">ของไหว้</option>
+      <option value="น้ำ">น้ำ</option>
+      <option value="อื่นๆ" selected>อื่นๆ</option>
+    </select>
+  </div>
+  
+  <button type="submit" class="btn btn-primary">เพิ่มสินค้า</button>
+</form>
 
-<hr>
-
-<div class="card">
-  <h3>รายการสินค้าทั้งหมด</h3>
-
-  {% if products %}
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>ชื่อสินค้า</th>
-          <th>ราคา</th>
-          <th>จัดการ</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in products %}
-        <tr>
-          <td data-label="ID">{{ p['id'] }}</td>
-          <td data-label="ชื่อสินค้า">{{ p['name'] }}</td>
-          <td data-label="ราคา">{{ p['price'] }} บาท</td>
-          <td data-label="จัดการ">
-            <a href="/admin/product/edit/{{ p['id'] }}" class="action-link">แก้ไข</a>
-            <form method="post" action="/admin/product/delete/{{ p['id'] }}" 
-                  style="display:inline;"
-                  onsubmit="return confirm('ยืนยันการลบ {{ p['name']|e }} ?');">
-              <button type="submit" class="delete-btn">ลบ</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p class="empty">ยังไม่มีสินค้าในระบบ</p>
-  {% endif %}
-</div>
+<!-- รายการสินค้าทั้งหมด -->
+<h3>รายการสินค้าปัจจุบัน</h3>
+<table style="width:100%; border-collapse:collapse;">
+  <thead>
+    <tr style="background:#f3f4f6;">
+      <th style="padding:0.8rem;">ID</th>
+      <th style="padding:0.8rem;">ชื่อสินค้า</th>
+      <th style="padding:0.8rem;">หมวดหมู่</th>
+      <th style="padding:0.8rem;">ราคา</th>
+      <th style="padding:0.8rem;">จัดการ</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in products %}
+    <tr style="border-bottom:1px solid #e5e7eb;">
+      <td style="padding:0.8rem; text-align:center;">{{ p['id'] }}</td>
+      <td style="padding:0.8rem;">{{ p['name'] }}</td>
+      <td style="padding:0.8rem;">{{ p['category'] or 'ไม่ระบุ' }}</td>
+      <td style="padding:0.8rem; text-align:right;">{{ p['price'] }} บาท</td>
+      <td style="padding:0.8rem; text-align:center;">
+        <a href="/admin/product/edit/{{ p['id'] }}" class="btn btn-outline">แก้ไข</a>
+        <form method="POST" action="/admin/product/delete/{{ p['id'] }}" style="display:inline;">
+          <button type="submit" class="btn btn-danger" onclick="return confirm('ยืนยันการลบ?')">ลบ</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

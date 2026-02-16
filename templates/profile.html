@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}โปรไฟล์ของฉัน{% endblock %}
+
+{% block content %}
+
+  <h1>โปรไฟล์ส่วนตัว</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category=='success' else 'danger' }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div style="background:white; padding:2rem; border-radius:12px; box-shadow:var(--shadow-md); max-width:600px; margin:2rem auto;">
+
+    <h3>ข้อมูลปัจจุบัน</h3>
+<p><strong>ชื่อผู้ใช้:</strong> {{ user.username }}</p>
+<p><strong>อีเมล:</strong> {{ user.email }}</p>
+<p><strong>เบอร์โทร:</strong> {{ user.phone or 'ยังไม่ได้ระบุ' }}</p>
+<p><strong>สมัครเมื่อ:</strong> {{ user.created_at|dateformat }}</p>
+
+    <hr style="margin:2rem 0;">
+
+    <h3>แก้ไขโปรไฟล์</h3>
+
+    <form method="POST" action="/profile">
+       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="margin-bottom:1.2rem;">
+        <label>ชื่อผู้ใช้ใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+        <input type="text" name="username" 
+               placeholder="{{ user.username }}"
+               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
+      </div>
+<!-- ... ในฟอร์มแก้ไข ... -->
+<div style="margin-bottom:1.2rem;">
+  <label>เบอร์โทรใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+  <input type="tel" name="phone" 
+         placeholder="{{ user.phone or 'เช่น 0812345678' }}"
+         pattern="[0-9]{9,10}"
+         style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
+</div>
+      <div style="margin-bottom:1.2rem;">
+        <label>อีเมลใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+        <input type="email" name="email" 
+               placeholder="{{ user.email }}"
+               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
+      </div>
+
+      <div style="margin-bottom:1.5rem;">
+        <label>รหัสผ่านใหม่ (เว้นว่าง = ไม่เปลี่ยน)</label>
+        <input type="password" name="new_password"
+               style="width:100%; padding:0.7rem; border:1px solid #d1d5db; border-radius:6px;">
+      </div>
+
+      <button type="submit" class="btn btn-success" style="padding:0.8rem 2rem;">
+        บันทึกการเปลี่ยนแปลง
+      </button>
+    </form>
+
+  </div>
+
+{% endblock %}
