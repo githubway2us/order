@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ระบบสั่งซื้อสินค้า{% endblock %}</title>
+
+  <!-- CSS หลัก (ธีมเดียวกันทั้งระบบ) -->
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray: #6b7280;
+      --light: #f3f4f6;
+      --white: #ffffff;
+      --border: #e5e7eb;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--light);
+      color: #1f2937;
+      margin: 0;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .site-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0;
+      text-decoration: none;
+    }
+
+    .site-title:hover {
+      color: var(--primary-dark);
+    }
+
+    main {
+      padding: 2rem 0;
+    }
+
+    footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 2rem 0 1rem;
+      margin-top: 3rem;
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* ปุ่มทั่วไป */
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover {
+      background: var(--success-dark);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    .btn-outline:hover {
+      background: rgba(59,130,246,0.1);
+    }
+
+    /* การแจ้งเตือน */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      main {
+        padding: 1.5rem 0;
+      }
+      .header-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+    .header-nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  transition: 0.2s;
+}
+
+.nav-link:hover {
+  background: rgba(59,130,246,0.1);
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+  </style>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  <header>
+    <div class="container header-inner">
+      <a href="/" class="site-title">ระบบสั่งออเดอร์สินค้า</a>
+      
+<nav class="header-nav">
+  {% block nav %}
+  <a href="/" 
+     class="nav-link {% if request.path == '/' %}active{% endif %}">
+     หน้าแรก
+  </a>
+
+  <a href="/admin" 
+     class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+     ดูออเดอร์
+  </a>
+
+  <a href="/admin/products" 
+     class="nav-link {% if '/admin/product' in request.path %}active{% endif %}">
+     จัดการสินค้า
+  </a>
+  {% endblock %}
+</nav>
+
+
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}
+      <!-- เนื้อหาหลักของแต่ละหน้า จะถูกแทนที่ตรงนี้ -->
+    {% endblock %}
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; {{ current_year }} ระบบสั่งซื้อสินค้า • พัฒนาโดย Geotran Manss</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

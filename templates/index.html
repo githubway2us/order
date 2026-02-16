@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}สั่งซื้อสินค้า{% endblock %}
+
+{% block content %}
+
+<h2>สั่งสินค้า</h2>
+
+{% if success %}
+<div class="success-message">
+  <span>✅ บันทึกสำเร็จ</span>
+  <p>ขอบคุณที่สั่งซื้อค่ะ เราจะติดต่อกลับโดยเร็วที่สุด</p>
+</div>
+{% endif %}
+
+<form method="post" action="/order" class="order-form" id="orderForm">
+
+  <div class="form-group">
+    <label for="name">ชื่อผู้สั่งซื้อ <span class="required">*</span></label>
+    <input type="text" id="name" name="name" required placeholder="เช่น นายสมชาย ใจดี" autocomplete="name">
+  </div>
+
+  <div class="form-group">
+    <label for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+    <input type="tel" id="phone" name="phone" required placeholder="เช่น 0812345678" 
+           pattern="[0-9]{9,10}" inputmode="numeric" autocomplete="tel">
+  </div>
+
+  <div class="products-section">
+    <h3>เลือกสินค้า</h3>
+
+    <div class="table-responsive">
+      <table class="product-table" id="productTable">
+        <thead>
+          <tr>
+            <th class="check-col">เลือก</th>
+            <th>สินค้า</th>
+            <th class="price-col">ราคา</th>
+            <th class="qty-col">จำนวน</th>
+            <th class="price-col">รวม</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr class="product-row" data-id="{{ p['id'] }}" data-price="{{ p['price'] }}">
+            <td class="check-col">
+              <input type="checkbox" name="product_id" value="{{ p['id'] }}" 
+                     id="prod_{{ p['id'] }}" class="product-check">
+            </td>
+            <td>
+              <label for="prod_{{ p['id'] }}">{{ p['name'] }}</label>
+            </td>
+            <td class="price-col">{{ p['price'] }} บาท</td>
+            <td class="qty-col">
+              <input type="number" name="qty_{{ p['id'] }}" value="0" min="0" max="999" step="1" 
+                     class="qty-input" data-id="{{ p['id'] }}">
+            </td>
+            <td class="price-col subtotal" data-id="{{ p['id'] }}">0 บาท</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="total-preview">
+      ยอดรวมทั้งสิ้น: <strong id="grandTotal">0 บาท</strong>
+    </div>
+
+    <p class="hint">※ เลือกสินค้าและระบุจำนวน หากไม่ต้องการให้ใส่ 0 หรือไม่ติ๊กเลือก</p>
+    <p class="no-selection" id="noSelectionWarning">
+      กรุณาเลือกอย่างน้อย 1 รายการ และจำนวนต้องมากกว่า 0
+    </p>
+  </div>
+
+  <div class="submit-area">
+    <button type="submit" class="submit-btn" id="submitBtn">สั่งซื้อเลย</button>
+  </div>
+
+</form>
+
+
+<script>
+  const form = document.getElementById('orderForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const grandTotalEl = document.getElementById('grandTotal');
+  const warningEl = document.getElementById('noSelectionWarning');
+
+  function updateTotals() {
+    let total = 0;
+    let hasSelection = false;
+
+    document.querySelectorAll('.product-row').forEach(row => {
+      const checkbox = row.querySelector('.product-check');
+      const qtyInput = row.querySelector('.qty-input');
+      const subtotalEl = row.querySelector('.subtotal');
+      const price = parseInt(row.dataset.price) || 0;
+      const qty = parseInt(qtyInput.value) || 0;
+
+      if (checkbox.checked && qty > 0) {
+        hasSelection = true;
+        row.classList.add('selected');
+      } else {
+        row.classList.remove('selected');
+      }
+
+      const subtotal = price * qty;
+      subtotalEl.textContent = subtotal.toLocaleString('th-TH') + ' บาท';
+
+      if (checkbox.checked) total += subtotal;
+    });
+
+    grandTotalEl.textContent = total.toLocaleString('th-TH') + ' บาท';
+
+    warningEl.style.display = hasSelection ? 'none' : 'block';
+    submitBtn.disabled = !hasSelection;
+  }
+
+  document.querySelectorAll('.product-check, .qty-input').forEach(el => {
+    el.addEventListener('change', updateTotals);
+    el.addEventListener('input', updateTotals);
+  });
+
+  form.addEventListener('submit', e => {
+    const checked = document.querySelectorAll('input[name="product_id"]:checked');
+    let valid = false;
+
+    checked.forEach(chk => {
+      const qty = document.querySelector(`input[name="qty_${chk.value}"]`);
+      if (qty && parseInt(qty.value) > 0) valid = true;
+    });
+
+    if (!valid) {
+      e.preventDefault();
+      alert('กรุณาเลือกสินค้าอย่างน้อย 1 รายการ และระบุจำนวนมากกว่า 0');
+    }
+  });
+
+  updateTotals();
+</script>
+
+{% endblock %}

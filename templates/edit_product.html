@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}สั่งซื้อสินค้า{% endblock %}
+
+{% block content %}
+<h1>แก้ไขสินค้า</h1>
+
+<div class="card">
+
+  {% if error %}
+    <div class="error-message">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    <div class="form-group">
+      <label for="name">ชื่อสินค้า</label>
+      <input type="text" id="name" name="name" value="{{ product['name'] }}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="price">ราคา (บาท)</label>
+      <input type="number" id="price" name="price" value="{{ product['price'] }}" min="0" required>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" class="submit-btn">บันทึกการแก้ไข</button>
+      <a href="/admin/products" class="cancel-link">ยกเลิก</a>
+    </div>
+  </form>
+
+</div>
+
+{% endblock %}

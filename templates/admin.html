@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}แอดมิน - รายการออเดอร์{% endblock %}
+
+
+{% block head_extra %}
+<style>
+
+/* container */
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* header */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+/* stats */
+.stats-overview {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.stat-card.highlight {
+  background: #eff6ff;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* order item */
+.order-item {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* divider */
+.order-divider {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1.5rem;
+}
+
+/* summary */
+.order-summary {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* details */
+.order-details {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* table */
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-table th,
+.order-table td {
+  padding: 0.5rem;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* total row */
+.total-row {
+  font-weight: bold;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* empty */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="page-container">
+
+  <header class="page-header">
+    <h1>รายการออเดอร์</h1>
+  </header>
+
+
+  <div class="stats-overview">
+
+    <div class="stat-card">
+      <div class="stat-label">ออเดอร์ทั้งหมด</div>
+      <div class="stat-value">
+        {{ total_orders|default(orders|length) }}
+      </div>
+    </div>
+
+    <div class="stat-card highlight">
+      <div class="stat-label">ยอดรวมทั้งระบบ</div>
+      <div class="stat-value">
+        {{ total_revenue|default(0)|int }} บาท
+      </div>
+    </div>
+
+  </div>
+
+
+
+  {% if orders %}
+
+    <div class="orders-list">
+
+      {% for order_id, order in orders|dictsort(reverse=True) %}
+
+        <details class="order-item{% if not loop.last %} order-divider{% endif %}">
+
+          <summary class="order-summary">
+
+            <div>
+              <strong>Order #{{ order_id }}</strong><br>
+              {{ order["customer_name"] }}
+            </div>
+
+            <div class="text-right">
+              📞 {{ order["phone"] }}<br>
+              🕒 {{ order["created_at"] }}<br>
+              <strong>{{ order["total"]|int }} บาท</strong>
+            </div>
+
+          </summary>
+
+
+
+          <div class="order-details">
+
+            <table class="order-table">
+
+              <thead>
+                <tr>
+                  <th>สินค้า</th>
+                  <th class="text-right">ราคา</th>
+                  <th class="text-center">จำนวน</th>
+                  <th class="text-right">รวม</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+
+                {% for item in order["items"] %}
+                <tr>
+                  <td>{{ item["product"] }}</td>
+                  <td class="text-right">{{ item["price"]|int }}</td>
+                  <td class="text-center">{{ item["qty"] }}</td>
+                  <td class="text-right">{{ item["subtotal"]|int }}</td>
+                </tr>
+                {% endfor %}
+
+
+                <tr class="total-row">
+                  <td colspan="3" class="text-right">รวมทั้งสิ้น</td>
+                  <td class="text-right">
+                    {{ order["total"]|int }} บาท
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </details>
+
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+
+      <div class="empty-icon">📭</div>
+
+      <p>ยังไม่มีออเดอร์</p>
+
+    </div>
+
+  {% endif %}
+
+</div>
+
+{% endblock %}

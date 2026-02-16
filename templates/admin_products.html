@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}สั่งซื้อสินค้า{% endblock %}
+
+{% block content %}
+<h1>จัดการสินค้า</h1>
+
+{% if success %}
+  <div class="message success">{{ success }}</div>
+{% endif %}
+{% if error %}
+  <div class="message error">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+  <h3>เพิ่มสินค้าใหม่</h3>
+  <form method="post" action="/admin/product/add" class="add-form">
+    <input type="text" name="name" placeholder="ชื่อสินค้า" required>
+    <input type="number" name="price" min="0" placeholder="ราคา (บาท)" required>
+    <button type="submit">เพิ่มสินค้า</button>
+  </form>
+</div>
+
+<hr>
+
+<div class="card">
+  <h3>รายการสินค้าทั้งหมด</h3>
+
+  {% if products %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>ชื่อสินค้า</th>
+          <th>ราคา</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td data-label="ID">{{ p['id'] }}</td>
+          <td data-label="ชื่อสินค้า">{{ p['name'] }}</td>
+          <td data-label="ราคา">{{ p['price'] }} บาท</td>
+          <td data-label="จัดการ">
+            <a href="/admin/product/edit/{{ p['id'] }}" class="action-link">แก้ไข</a>
+            <form method="post" action="/admin/product/delete/{{ p['id'] }}" 
+                  style="display:inline;"
+                  onsubmit="return confirm('ยืนยันการลบ {{ p['name']|e }} ?');">
+              <button type="submit" class="delete-btn">ลบ</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">ยังไม่มีสินค้าในระบบ</p>
+  {% endif %}
+</div>
+
+{% endblock %}
